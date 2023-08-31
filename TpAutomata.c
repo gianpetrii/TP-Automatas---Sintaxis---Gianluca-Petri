@@ -17,7 +17,41 @@ int columnaDecimal(int c);
 int columnaOctal(int c);
 int columnaHexadecimal(int c);
 
+int evaluadorDeCadenas();
+
+int operacionEntreCaracteres();
+int charHaciaNumero(char c);
+int verificacionAlfabetoOperacion(const char *s);
+
 int main()
+{
+   char funcion[30];
+   printf("Que funcion quiere utilizar?: ");
+   scanf("%s", funcion);
+   printf("%s", funcion);
+
+   // finalizador de programa, en consola tengo que escribir \0
+   while (strcmp(funcion, "exit") != 0)
+   {
+      if (strcmp(funcion, "evaluadorDeCadenas") == 0)
+      {
+         evaluadorDeCadenas();
+      }
+      else if (strcmp(funcion, "operacionEntreCaracteres") == 0)
+      {
+         operacionEntreCaracteres();
+      }
+      else
+      {
+         printf("\nLa funcion pedida no existe\n");
+      }
+      printf("Que funcion quiere utilizar?: ");
+      scanf("%s", funcion);
+   }
+   printf("El programa ha finalizado");
+   return 0;
+}
+int evaluadorDeCadenas()
 {
    // Cadena de prueba
    char cadena[100];
@@ -27,8 +61,13 @@ int main()
    // manejo separacion de subcadenas
    const char delim[] = "$";
 
+   // si escribo exit por consola la funcion finaliza
    while (strcmp(cadena, "exit") != 0)
    {
+      // contadores para cada tipo de numero
+      int cantidadDecimales = 0;
+      int cantidadOctales = 0;
+      int cantidadHexadecimales = 0;
 
       // Primera llamada para obtener el primer sub cadena
       char *subCadena = strtok(cadena, delim);
@@ -46,25 +85,34 @@ int main()
          else if (esDecimal(subCadena))
          {
             printf("ESTA CADENA ES UN NUMERO DECIMAL\n");
+            cantidadDecimales = cantidadDecimales + 1; // sumo uno al contador
          }
          // En caso de no serlo, se puede agregar aquí la verificación de octal o hexadecimal
          else if (esOctal(subCadena))
          {
             printf("ESTA CADENA ES UN NUMERO OCTAL\n");
+            cantidadOctales++; // sumo uno al contador
          }
          else if (esHexadecimal(subCadena))
          {
             printf("ESTA CADENA ES UN NUMERO HEXADECIMAL\n");
+            cantidadHexadecimales++; // sumo uno al contador
          }
 
          printf("la evaluacion de esta cadena:%s ha finalizado\n", subCadena);
          // para q automaticamente tome proxima cadena le paso NULL
          subCadena = strtok(NULL, delim);
       }
+      // imprimo contadores en pantalla
+      printf("La cantidad de numeros decimales evaluados fue: %d\n", cantidadDecimales);
+      printf("La cantidad de numeros octales evaluados fue: %d\n", cantidadOctales);
+      printf("La cantidad de numeros hexadecimales evaluados fue: %d\n", cantidadHexadecimales);
+
+      // vuelvo a pedir cadena
       printf("\nIngrese una cadena: ");
       scanf("%s", cadena);
    }
-   printf("Ya se han evaluado todas las cadenas\n");
+   printf("Saliendo del evaluador de cadenas\n");
    return 0;
 }
 // ##########################FUNCIONES GENERALES##########################
@@ -302,4 +350,52 @@ int columnaHexadecimal(int c)
    default:
       return 2;
    }
+}
+
+// funcion que convierte a un caracter numerico a numero
+int charHaciaNumero(char c)
+{
+   if (!isdigit(c))
+   {
+      return c - '0'; // Convierte el carácter numérico a su valor entero
+   }
+   else
+   {
+      return 1; // Retorna un valor negativo para indicar que no es un dígito válido
+   }
+}
+
+int operacionEntreCaracteres()
+{
+   char operacion[100];
+   scanf("%s", operacion);
+
+   while (strcmp(operacion, "exit") != 0)
+   {
+      printf("La operacion a realizar es: %s\n", operacion);
+
+      // chequeo cadena
+      verificacionAlfabetoOperacion(operacion);
+   }
+
+   printf("La funcion operacionEntreCaracteres ha terminado");
+   return 0;
+}
+
+// Función que verifica que todos los chars de la cadena pertenezcan al alfabeto de operaciones
+int verificacionAlfabetoOperacion(const char *s)
+{
+   // Defino una variable que usaré para recorrer de a un caracter la cadena
+   unsigned i;
+   for (i = 0; s[i]; i++)
+   {
+      // Uso comillas simples para representar caracteres individuales
+      if (!(s[i] == '+' || s[i] == '-' || isdigit(s[i]) || s[i] == '/' || s[i] == '*'))
+      {
+         printf("ESTA CADENA NO ESTA EN EL ALFABETO OPERABLE\n");
+         return 0;
+      }
+   }
+   printf("ESTA CADENA ESTA EN EL ALFABETO OPERABLE\n");
+   return 1; // Si no se encontraron caracteres no permitidos, la cadena es válida
 }
