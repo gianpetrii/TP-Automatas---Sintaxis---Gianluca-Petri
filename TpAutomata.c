@@ -355,27 +355,40 @@ int columnaHexadecimal(int c)
 // funcion que convierte a un caracter numerico a numero
 int charHaciaNumero(char c)
 {
-   if (!isdigit(c))
+   printf("Evaluando char: %c\n", c); // Usar %c para imprimir un carácter
+   if (isdigit(c))
    {
       return c - '0'; // Convierte el carácter numérico a su valor entero
    }
    else
    {
-      return 1; // Retorna un valor negativo para indicar que no es un dígito válido
+      return -1; // Retorna un valor negativo para indicar que no es un dígito válido
    }
 }
 
 int operacionEntreCaracteres()
 {
    char operacion[100];
-   scanf("%s", operacion);
+   scanf("Ingrese la operacion a realizar: %s", operacion);
 
    while (strcmp(operacion, "exit") != 0)
    {
       printf("La operacion a realizar es: %s\n", operacion);
 
       // chequeo cadena
-      verificacionAlfabetoOperacion(operacion);
+      if (!verificacionAlfabetoOperacion(operacion))
+      {
+         printf("ESTA CADENA NO ESTA EN EL ALFABETO OPERABLE\n");
+      }
+      else
+      {
+
+         printf("ESTA CADENA ESTA EN EL ALFABETO OPERABLE\n");
+         printf("El resultado es: %d\n", operar(operacion));
+      }
+      // vuelvo a preguntar para ver si se quiere hacer nueva operacion
+
+      scanf("Ingrese la operacion a realizar: %s\n", operacion);
    }
 
    printf("La funcion operacionEntreCaracteres ha terminado");
@@ -392,10 +405,13 @@ int verificacionAlfabetoOperacion(const char *s)
       // Uso comillas simples para representar caracteres individuales
       if (!(s[i] == '+' || s[i] == '-' || isdigit(s[i]) || s[i] == '/' || s[i] == '*'))
       {
-         printf("ESTA CADENA NO ESTA EN EL ALFABETO OPERABLE\n");
          return 0;
       }
    }
-   printf("ESTA CADENA ESTA EN EL ALFABETO OPERABLE\n");
    return 1; // Si no se encontraron caracteres no permitidos, la cadena es válida
+}
+
+int operar(char operador)
+{
+   return 0;
 }
