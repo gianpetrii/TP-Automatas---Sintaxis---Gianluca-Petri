@@ -1,2 +1,8 @@
-.vscode/
-.exe
+# ignora los .exe
+*.exe
+
+# ignora la carpeta de code
+.vscode
+
+# ignoro archivo de pruebas
+TpAuto2.c
