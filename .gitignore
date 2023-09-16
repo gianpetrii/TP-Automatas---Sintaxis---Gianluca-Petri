@@ -6,3 +6,6 @@
 
 # ignoro archivo de pruebas
 TpAuto2.c
+
+# el documento abierto
+~$*.docx

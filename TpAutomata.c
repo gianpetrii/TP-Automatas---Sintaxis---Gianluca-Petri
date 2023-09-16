@@ -1,7 +1,5 @@
-#include <stdio.h>
-#include <ctype.h>
-#include <string.h>
-#include <string.h> // para usar strtok
+// para usar pila
+#include "TpAutomata.h"
 
 // Declaración de funciones
 int verificacionAlfabeto(const char *s);
@@ -20,15 +18,17 @@ int columnaHexadecimal(int c);
 int evaluadorDeCadenas();
 
 int operacionEntreCaracteres();
-int charHaciaNumero(char c);
 int verificacionAlfabetoOperacion(const char *s);
+
+// infija a post y luego resuelvo
+int operar(char *operador);
+char *infijaAPostfija(char *infija);
 
 int main()
 {
    char funcion[30];
    printf("Que funcion quiere utilizar?: ");
    scanf("%s", funcion);
-   printf("%s", funcion);
 
    // finalizador de programa, en consola tengo que escribir \0
    while (strcmp(funcion, "exit") != 0)
@@ -51,67 +51,114 @@ int main()
    printf("El programa ha finalizado");
    return 0;
 }
+
 int evaluadorDeCadenas()
 {
-   // Cadena de prueba
-   char cadena[100];
-   printf("\nIngrese una cadena: ");
-   scanf("%s", cadena);
+   char metodo[30];
+   printf("Por donde se desea leer la cadena?: ");
+   scanf("%s", metodo);
 
-   // manejo separacion de subcadenas
-   const char delim[] = "$";
+   char cadena[100]; // aca voy a guardar mi cadena a evaluar
 
-   // si escribo exit por consola la funcion finaliza
-   while (strcmp(cadena, "exit") != 0)
+   while (strcmp(metodo, "exit") != 0)
    {
-      // contadores para cada tipo de numero
-      int cantidadDecimales = 0;
-      int cantidadOctales = 0;
-      int cantidadHexadecimales = 0;
 
-      // Primera llamada para obtener el primer sub cadena
-      char *subCadena = strtok(cadena, delim);
-      // Voy recorriendo cada sub cadena de a una
-      while (subCadena != NULL)
+      if (strcmp(metodo, "consola") == 0)
       {
-
-         printf("La sub cadena actual es: %s\n", subCadena);
-         // Verifico que los chars estén en el alfabeto
-         if (!verificacionAlfabeto(subCadena))
-         {
-            printf("ESTA CADENA TIENE AL MENOS UN CARACTER QUE NO PERTENECE A NINGUN ALFABETO\n");
-         }
-         // Ahora pregunto si es un número decimal
-         else if (esDecimal(subCadena))
-         {
-            printf("ESTA CADENA ES UN NUMERO DECIMAL\n");
-            cantidadDecimales = cantidadDecimales + 1; // sumo uno al contador
-         }
-         // En caso de no serlo, se puede agregar aquí la verificación de octal o hexadecimal
-         else if (esOctal(subCadena))
-         {
-            printf("ESTA CADENA ES UN NUMERO OCTAL\n");
-            cantidadOctales++; // sumo uno al contador
-         }
-         else if (esHexadecimal(subCadena))
-         {
-            printf("ESTA CADENA ES UN NUMERO HEXADECIMAL\n");
-            cantidadHexadecimales++; // sumo uno al contador
-         }
-
-         printf("la evaluacion de esta cadena:%s ha finalizado\n", subCadena);
-         // para q automaticamente tome proxima cadena le paso NULL
-         subCadena = strtok(NULL, delim);
+         // recibo cadena por consola
+         printf("\nIngrese una cadena: ");
+         scanf("%s", cadena);
+         strcpy(metodo, "exit");
       }
-      // imprimo contadores en pantalla
-      printf("La cantidad de numeros decimales evaluados fue: %d\n", cantidadDecimales);
-      printf("La cantidad de numeros octales evaluados fue: %d\n", cantidadOctales);
-      printf("La cantidad de numeros hexadecimales evaluados fue: %d\n", cantidadHexadecimales);
+      else if (strcmp(metodo, "archivo") == 0)
+      {
+         // aca me traigo de archivo el valor de cadena
+         FILE *fp;
+         fp = fopen("tests/test.txt", "r");
 
-      // vuelvo a pedir cadena
-      printf("\nIngrese una cadena: ");
-      scanf("%s", cadena);
+         // en caso de no poder abrirlo
+         if (fp == NULL)
+         {
+            printf("\nArchivo NO se pudo abrir");
+         }
+         else
+         {
+            printf("\nArchivo abierto con exito");
+
+            // leo linea de comando
+            fscanf(fp, "%s", cadena);
+            // cierro el archivo
+            fclose(fp);
+
+            // para salir del loop
+            strcpy(metodo, "exit");
+         }
+      }
+      else
+      {
+         printf("\nEl metodo pedido no existe\n");
+         printf("Por donde se desea leer la cadena?: ");
+         scanf("%s", metodo);
+      }
+
+      // manejo separacion de subcadenas
+      const char delim[] = "$";
+
+      // si escribo exit por consola la funcion finaliza
+      while (strcmp(cadena, "exit") != 0)
+      {
+         // contadores para cada tipo de numero
+         int cantidadDecimales = 0;
+         int cantidadOctales = 0;
+         int cantidadHexadecimales = 0;
+
+         // Primera llamada para obtener el primer sub cadena
+         char *subCadena = strtok(cadena, delim);
+         // Voy recorriendo cada sub cadena de a una
+         while (subCadena != NULL)
+         {
+
+            printf("La sub cadena actual es: %s\n", subCadena);
+            // Verifico que los chars estén en el alfabeto
+            if (!verificacionAlfabeto(subCadena))
+            {
+               printf("ESTA CADENA TIENE AL MENOS UN CARACTER QUE NO PERTENECE A NINGUN ALFABETO\n");
+            }
+            // Ahora pregunto si es un número decimal
+            else if (esDecimal(subCadena))
+            {
+               printf("ESTA CADENA ES UN NUMERO DECIMAL\n");
+               cantidadDecimales = cantidadDecimales + 1; // sumo uno al contador
+            }
+            // En caso de no serlo, se puede agregar aquí la verificación de octal o hexadecimal
+            else if (esOctal(subCadena))
+            {
+               printf("ESTA CADENA ES UN NUMERO OCTAL\n");
+               cantidadOctales++; // sumo uno al contador
+            }
+            else if (esHexadecimal(subCadena))
+            {
+               printf("ESTA CADENA ES UN NUMERO HEXADECIMAL\n");
+               cantidadHexadecimales++; // sumo uno al contador
+            }
+
+            printf("la evaluacion de esta cadena:%s ha finalizado\n", subCadena);
+            // para q automaticamente tome proxima cadena le paso NULL
+            subCadena = strtok(NULL, delim);
+         }
+         // imprimo contadores en pantalla
+         printf("La cantidad de numeros decimales evaluados fue: %d\n", cantidadDecimales);
+         printf("La cantidad de numeros octales evaluados fue: %d\n", cantidadOctales);
+         printf("La cantidad de numeros hexadecimales evaluados fue: %d\n", cantidadHexadecimales);
+
+         // vuelvo a pedir cadena
+         printf("\nIngrese una cadena: ");
+         scanf("%s", cadena);
+      }
+      printf("Que metodo quiere utilizar?: ");
+      scanf("%s", metodo);
    }
+
    printf("Saliendo del evaluador de cadenas\n");
    return 0;
 }
@@ -352,24 +399,11 @@ int columnaHexadecimal(int c)
    }
 }
 
-// funcion que convierte a un caracter numerico a numero
-int charHaciaNumero(char c)
-{
-   printf("Evaluando char: %c\n", c); // Usar %c para imprimir un carácter
-   if (isdigit(c))
-   {
-      return c - '0'; // Convierte el carácter numérico a su valor entero
-   }
-   else
-   {
-      return -1; // Retorna un valor negativo para indicar que no es un dígito válido
-   }
-}
-
 int operacionEntreCaracteres()
 {
    char operacion[100];
-   scanf("Ingrese la operacion a realizar: %s", operacion);
+   printf("\nIngrese una operacion a realizar: ");
+   scanf("%s", operacion);
 
    while (strcmp(operacion, "exit") != 0)
    {
@@ -382,16 +416,16 @@ int operacionEntreCaracteres()
       }
       else
       {
-
          printf("ESTA CADENA ESTA EN EL ALFABETO OPERABLE\n");
-         printf("El resultado es: %d\n", operar(operacion));
+         operar(operacion);
+         // printf("El resultado es: %d\n", operar(operacion));
       }
       // vuelvo a preguntar para ver si se quiere hacer nueva operacion
-
-      scanf("Ingrese la operacion a realizar: %s\n", operacion);
+      printf("\nIngrese una operacion a realizar: ");
+      scanf("%s", operacion);
    }
 
-   printf("La funcion operacionEntreCaracteres ha terminado");
+   printf("La funcion operacionEntreCaracteres ha terminado\n");
    return 0;
 }
 
@@ -411,7 +445,61 @@ int verificacionAlfabetoOperacion(const char *s)
    return 1; // Si no se encontraron caracteres no permitidos, la cadena es válida
 }
 
-int operar(char operador)
+int operar(char *operador)
 {
+   printf("la conversion a postfija queda como: %s\n", infijaAPostfija(operador));
    return 0;
+}
+
+char *infijaAPostfija(char *infija)
+
+{
+   char elemento, operador;
+   char *postfija;
+   postfija = malloc(sizeof(char) * 100);
+   int j = 0;
+   int i = 0;
+   Pila *pila = crear();
+   int longitud = strlen(infija);
+   while (i < longitud)
+   {
+      elemento = infija[i];
+      i++;
+      if (esOperando(elemento)) // si es operando escribo en postfija
+      {
+         postfija[j] = elemento;
+         j++;
+      }
+      else if (esOperador(elemento)) // si es operador
+      {
+         if (!estaVacia(*pila)) // si esta vacia meto directo en pila
+         {
+            int seDebeContinuar;
+            do
+            {
+               operador = pop(pila);
+               if (tieneMasPriori(operador, elemento)) // me traigo ultimo operador de pila para comparar precedencia con mi elemento
+               {
+                  postfija[j] = operador; // si tiene mas o igual prioridad pongo el operador en postfija y vuelvo a chequear pila con elemento
+                  j++;
+                  seDebeContinuar = 1;
+               }
+               else
+               {
+                  seDebeContinuar = 0;
+                  push(pila, operador); // como operador no tiene mayor prioridad lo devuelvo a la pila
+               }
+            } while (!estaVacia(*pila) && seDebeContinuar);
+         }
+         push(pila, elemento); // meto elemento actual al final de cola
+      }
+   }
+   while (!estaVacia(*pila)) // esto es al final para agregar todos los operadores restantes
+   {
+      operador = pop(pila);
+      postfija[j] = operador;
+      j++;
+   }
+   postfija[j] = '\0'; // agrego el final de cadena
+   return postfija;
 }
