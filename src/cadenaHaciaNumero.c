@@ -1,7 +1,4 @@
-// pseudocodigo
-
-// para usar pila
-#include "cadenaHaciaNumero.h"
+#include "../include/cadenaHaciaNumero.h"
 
 int charHaciaNumero(char cadena[])
 {

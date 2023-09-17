@@ -1,28 +1,5 @@
 // para usar pila
-#include "TpAutomata.h"
-
-// Declaración de funciones
-int verificacionAlfabeto(const char *s);
-int verificacionAlfabetoDecimal(const char *s);
-int verificacionAlfabetoOctal(const char *s);
-int verificacionAlfabetoHexadecimal(const char *s);
-
-int esDecimal(const char *s);
-int esOctal(const char *s);
-int esHexadecimal(const char *s);
-
-int columnaDecimal(int c);
-int columnaOctal(int c);
-int columnaHexadecimal(int c);
-
-int evaluadorDeCadenas();
-
-int operacionEntreCaracteres();
-int verificacionAlfabetoOperacion(const char *s);
-
-// infija a post y luego resuelvo
-int operar(char *operador);
-char *infijaAPostfija(char *infija);
+#include "include/TpAutomata.h"
 
 int main()
 {
@@ -417,8 +394,9 @@ int operacionEntreCaracteres()
       else
       {
          printf("ESTA CADENA ESTA EN EL ALFABETO OPERABLE\n");
-         operar(operacion);
-         // printf("El resultado es: %d\n", operar(operacion));
+         char *postfija;
+         postfija = infijaHaciaPostfija(operacion);
+         printf("Primero reescribo la expresion como postfija: %s\n", postfija);
       }
       // vuelvo a preguntar para ver si se quiere hacer nueva operacion
       printf("\nIngrese una operacion a realizar: ");
@@ -445,61 +423,59 @@ int verificacionAlfabetoOperacion(const char *s)
    return 1; // Si no se encontraron caracteres no permitidos, la cadena es válida
 }
 
-int operar(char *operador)
-{
-   printf("la conversion a postfija queda como: %s\n", infijaAPostfija(operador));
-   return 0;
-}
-
-char *infijaAPostfija(char *infija)
+char *infijaHaciaPostfija(char *infija)
 
 {
-   char elemento, operador;
+   char charActual, operador; // mi char actual y el operador cuando lo tenga q evaluar
    char *postfija;
-   postfija = malloc(sizeof(char) * 100);
-   int j = 0;
-   int i = 0;
+   postfija = malloc(sizeof(char) * 100); // aca voy a ir poniendo expresion postfija
+   int j = 0;                             // posicion en la cadena postfija
+   int pos = 0;                           // posicion en la recorrida de la cadena de prueba
    Pila *pila = crear();
-   int longitud = strlen(infija);
-   while (i < longitud)
+   int longitud = strlen(infija); // longitud de la cadena
+
+   while (pos < longitud) // condicion de no haber recorrido todos los chars en cadena
    {
-      elemento = infija[i];
-      i++;
-      if (esOperando(elemento)) // si es operando escribo en postfija
+      charActual = infija[pos];
+
+      if (esOperando(charActual)) // si es operando escribo en postfija y reubico la posicion
       {
-         postfija[j] = elemento;
+         postfija[j] = charActual;
          j++;
       }
-      else if (esOperador(elemento)) // si es operador
+      else if (esOperador(charActual)) // si es operador
       {
          if (!estaVacia(*pila)) // si esta vacia meto directo en pila
          {
-            int seDebeContinuar;
-            do
+            int sem_rechequear = 1; // defino un semaforo para saber si tengo que volver a comparar con int en la cima de la pila
+
+            while (!estaVacia(*pila) && sem_rechequear) // ingreso siempre que la pila tenga algo y tenga q rechequear
             {
-               operador = pop(pila);
-               if (tieneMasPriori(operador, elemento)) // me traigo ultimo operador de pila para comparar precedencia con mi elemento
+               operador = pop(pila);                     // me traigo tope de pila
+               if (tieneMasPriori(operador, charActual)) // comparo precedencia con mi charActual
                {
-                  postfija[j] = operador; // si tiene mas o igual prioridad pongo el operador en postfija y vuelvo a chequear pila con elemento
+                  postfija[j] = operador; // si tiene mas o igual prioridad pongo el operador en postfija y vuelvo a chequear pila con charActual
                   j++;
-                  seDebeContinuar = 1;
+                  sem_rechequear = 1;
                }
                else
                {
-                  seDebeContinuar = 0;
+                  sem_rechequear = 0;
                   push(pila, operador); // como operador no tiene mayor prioridad lo devuelvo a la pila
                }
-            } while (!estaVacia(*pila) && seDebeContinuar);
+            }
          }
-         push(pila, elemento); // meto elemento actual al final de cola
+         push(pila, charActual); // meto charActual actual al final de cola
       }
+      pos++; // analizo el proximo caracter
    }
-   while (!estaVacia(*pila)) // esto es al final para agregar todos los operadores restantes
+   while (!estaVacia(*pila)) // esto es al final para agregar todos los operadores restantes de menor precedencia
    {
-      operador = pop(pila);
+      operador = pop(pila); // traigo tope de pila y lo agrego a postfija repitiendo hasta que no queden operadores
       postfija[j] = operador;
       j++;
    }
-   postfija[j] = '\0'; // agrego el final de cadena
+   postfija[j] = '\0'; // agrego el final de cadena para saber cuando finaliza
+
    return postfija;
 }
