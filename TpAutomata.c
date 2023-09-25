@@ -51,7 +51,7 @@ int evaluadorDeCadenas()
       {
          // aca me traigo de archivo el valor de cadena
          FILE *fp;
-         fp = fopen("tests/test.txt", "r");
+         fp = fopen("tests/testPrimerPunto.txt", "r");
 
          // en caso de no poder abrirlo
          if (fp == NULL)
@@ -378,33 +378,75 @@ int columnaHexadecimal(int c)
 
 int operacionEntreCaracteres()
 {
-   char operacion[100];
-   printf("\nIngrese una operacion a realizar: ");
-   scanf("%s", operacion);
+   char metodo[30];
+   printf("Por donde se desea leer la operacion?: ");
+   scanf("%s", metodo);
 
-   while (strcmp(operacion, "exit") != 0)
+   char operacion[100]; // aca voy a guardar mi operacion a evaluar
+
+   while (strcmp(metodo, "exit") != 0)
    {
-      printf("La operacion a realizar es: %s\n", operacion);
 
-      // chequeo cadena
-      if (!verificacionAlfabetoOperacion(operacion))
+      if (strcmp(metodo, "consola") == 0)
       {
-         printf("ESTA CADENA NO ESTA EN EL ALFABETO OPERABLE\n");
+         // recibo operacion por consola
+         printf("\nIngrese una operacion: ");
+         scanf("%s", operacion);
+         strcpy(metodo, "exit");
+      }
+      else if (strcmp(metodo, "archivo") == 0)
+      {
+         // aca me traigo de archivo el valor de operacion
+         FILE *fp;
+         fp = fopen("tests/testTercerPunto.txt", "r");
+
+         // en caso de no poder abrirlo
+         if (fp == NULL)
+         {
+            printf("\nArchivo NO se pudo abrir");
+         }
+         else
+         {
+            printf("\nArchivo abierto con exito");
+
+            // leo linea de comando
+            fscanf(fp, "%s", operacion);
+            // cierro el archivo
+            fclose(fp);
+
+            // para salir del loop
+            strcpy(metodo, "exit");
+         }
       }
       else
       {
-         printf("ESTA CADENA ESTA EN EL ALFABETO OPERABLE\n");
-         char *postfija;
-         postfija = infijaHaciaPostfija(operacion);
-         printf("Primero reescribo la expresion como postfija: %s\n", postfija);
+         printf("\nEl metodo pedido no existe\n");
+         printf("Por donde se desea leer la operacion?: ");
+         scanf("%s", metodo);
       }
-      // vuelvo a preguntar para ver si se quiere hacer nueva operacion
-      printf("\nIngrese una operacion a realizar: ");
-      scanf("%s", operacion);
-   }
 
-   printf("La funcion operacionEntreCaracteres ha terminado\n");
-   return 0;
+      while (strcmp(operacion, "exit") != 0)
+      {
+         printf("La operacion a realizar es: %s\n", operacion);
+
+         // chequeo cadena
+         if (!verificacionAlfabetoOperacion(operacion))
+         {
+            printf("ESTA CADENA NO ESTA EN EL ALFABETO OPERABLE\n");
+         }
+         else
+         {
+            printf("ESTA CADENA ESTA EN EL ALFABETO OPERABLE\n");
+            realizarCuenta(operacion);
+         }
+         // vuelvo a preguntar para ver si se quiere hacer nueva operacion
+         printf("\nIngrese una operacion a realizar: ");
+         scanf("%s", operacion);
+      }
+
+      printf("La funcion operacionEntreCaracteres ha terminado\n");
+      return 0;
+   }
 }
 
 // Función que verifica que todos los chars de la cadena pertenezcan al alfabeto de operaciones
@@ -421,61 +463,4 @@ int verificacionAlfabetoOperacion(const char *s)
       }
    }
    return 1; // Si no se encontraron caracteres no permitidos, la cadena es válida
-}
-
-char *infijaHaciaPostfija(char *infija)
-
-{
-   char charActual, operador; // mi char actual y el operador cuando lo tenga q evaluar
-   char *postfija;
-   postfija = malloc(sizeof(char) * 100); // aca voy a ir poniendo expresion postfija
-   int j = 0;                             // posicion en la cadena postfija
-   int pos = 0;                           // posicion en la recorrida de la cadena de prueba
-   Pila *pila = crear();
-   int longitud = strlen(infija); // longitud de la cadena
-
-   while (pos < longitud) // condicion de no haber recorrido todos los chars en cadena
-   {
-      charActual = infija[pos];
-
-      if (esOperando(charActual)) // si es operando escribo en postfija y reubico la posicion
-      {
-         postfija[j] = charActual;
-         j++;
-      }
-      else if (esOperador(charActual)) // si es operador
-      {
-         if (!estaVacia(*pila)) // si esta vacia meto directo en pila
-         {
-            int sem_rechequear = 1; // defino un semaforo para saber si tengo que volver a comparar con int en la cima de la pila
-
-            while (!estaVacia(*pila) && sem_rechequear) // ingreso siempre que la pila tenga algo y tenga q rechequear
-            {
-               operador = pop(pila);                     // me traigo tope de pila
-               if (tieneMasPriori(operador, charActual)) // comparo precedencia con mi charActual
-               {
-                  postfija[j] = operador; // si tiene mas o igual prioridad pongo el operador en postfija y vuelvo a chequear pila con charActual
-                  j++;
-                  sem_rechequear = 1;
-               }
-               else
-               {
-                  sem_rechequear = 0;
-                  push(pila, operador); // como operador no tiene mayor prioridad lo devuelvo a la pila
-               }
-            }
-         }
-         push(pila, charActual); // meto charActual actual al final de cola
-      }
-      pos++; // analizo el proximo caracter
-   }
-   while (!estaVacia(*pila)) // esto es al final para agregar todos los operadores restantes de menor precedencia
-   {
-      operador = pop(pila); // traigo tope de pila y lo agrego a postfija repitiendo hasta que no queden operadores
-      postfija[j] = operador;
-      j++;
-   }
-   postfija[j] = '\0'; // agrego el final de cadena para saber cuando finaliza
-
-   return postfija;
 }

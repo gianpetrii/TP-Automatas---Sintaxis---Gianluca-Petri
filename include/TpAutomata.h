@@ -1,8 +1,7 @@
 #ifndef TP_AUTOMATA
 #define TP_AUTOMATA
 
-#include "../src/pila.c"
-#include "../src/cadenaHaciaNumero.c"
+#include "../src/otraResolucion.c"
 
 #include <stdio.h>
 #include <ctype.h>
@@ -26,8 +25,5 @@ int evaluadorDeCadenas();
 
 int operacionEntreCaracteres();
 int verificacionAlfabetoOperacion(const char *s);
-
-// infija a post y luego resuelvo
-char *infijaHaciaPostfija(char *infija);
 
 #endif
