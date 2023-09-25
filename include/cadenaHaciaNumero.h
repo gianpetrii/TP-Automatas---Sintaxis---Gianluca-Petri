@@ -5,6 +5,6 @@
 #include <ctype.h>
 #include <string.h> // para usar strtok
 
-int charHaciaNumero(char cadena[]);
+int charHaciaNumero(char *cadena);
 
 #endif
